@@ -1,0 +1,2 @@
+* Inform client master queue has changed.
+* Request song file.

@@ -1,0 +1,2 @@
+* Ask for master song queue.
+* Update personal queue.
