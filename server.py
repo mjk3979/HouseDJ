@@ -8,7 +8,7 @@ s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 s.bind((SERVER_IP, SERVER_PORT))
 s.listen(1)
 
-conn, addr = s.accept
+(conn, addr) = s.accept()
 print ('Client connected:', addr)
 while 1:
     data = conn.recv(BUFFER_SIZE)

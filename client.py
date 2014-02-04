@@ -4,8 +4,9 @@ SERVER_IP= '127.0.0.1'
 SERVER_PORT = 5555
 BUFFER_SIZE = 20
 
-s = socket.socket()
+s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
 s.connect((SERVER_IP,SERVER_PORT))
-print s.recv(1024)
+s.send(input())
+print (s.recv(1024))
 s.close()
