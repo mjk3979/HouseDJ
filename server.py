@@ -1,8 +1,10 @@
 import socket
+import pickle
+from common import Song
 
 SERVER_IP = '127.0.0.1'
 SERVER_PORT = 5555
-BUFFER_SIZE = 20
+BUFFER_SIZE = 100
 
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 s.bind((SERVER_IP, SERVER_PORT))
@@ -12,7 +14,9 @@ s.listen(1)
 print ('Client connected:', addr)
 while 1:
     data = conn.recv(BUFFER_SIZE)
+    song = pickle.loads(data)
     if not data: break
-    print ('got data: ', data)
+    print ('got song: ')
+    print (song)
     conn.send(data)
 conn.close()
