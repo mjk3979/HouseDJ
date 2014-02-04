@@ -1,22 +1,14 @@
-import socket
+import zmq
 import pickle
 from common import Song
 
-SERVER_IP = '127.0.0.1'
-SERVER_PORT = 5555
-BUFFER_SIZE = 100
+port = 5555
 
-s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-s.bind((SERVER_IP, SERVER_PORT))
-s.listen(1)
+context = zmq.Context()
 
-(conn, addr) = s.accept()
-print ('Client connected:', addr)
-while 1:
-    data = conn.recv(BUFFER_SIZE)
-    song = pickle.loads(data)
-    if not data: break
-    print ('got song: ')
-    print (song)
-    conn.send(data)
-conn.close()
+socket = context.socket(zmq.REP)
+socket.bind("tcp://*:%s" % (port,))
+
+data = socket.recv()
+song = pickle.loads(data)
+print(song)
