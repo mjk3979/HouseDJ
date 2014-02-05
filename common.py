@@ -7,3 +7,12 @@ class Song:
 
     def __str__(self):
         return self.title + " by " + self.artist
+
+class ClientData:
+    __slots__=('nickname')
+
+    def __init__(self, nickname):
+        self.nickname = nickname
+
+    def __str__(self):
+        return self.nickname
