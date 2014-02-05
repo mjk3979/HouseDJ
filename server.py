@@ -47,6 +47,10 @@ def recieveMessage():
         newClient = Client(clientdata)
         clients[clientdata] = newClient
     clients[clientdata].recieveMessage(data)
+    if masterQueue != None:
+        print ("Master Queue:")
+        for song in masterQueue:
+            print(song)
 
 def main():
     global socket
