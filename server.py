@@ -41,6 +41,7 @@ class Client:
 
 
 def recieveMessage():
+    global socket, masterQueue, clients
     raw = socket.recv()
     (clientdata, data) = pickle.loads(raw)
     if not clientdata in clients:
@@ -56,7 +57,7 @@ def main():
     global socket
     port = 5555
     context = zmq.Context()
-    socket = context.socket(zmq.REP)
+    socket = context.socket(zmq.PAIR)
     socket.bind("tcp://*:%s" % (port,))
 
     # Loop to recieve clients
