@@ -16,3 +16,9 @@ class ClientData:
 
     def __str__(self):
         return self.nickname
+
+    def __hash__(self):
+        return hash(self.nickname)
+
+    def __eq__(self, other):
+        return self.nickname == other.nickname
