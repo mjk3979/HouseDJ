@@ -1,0 +1,6 @@
+Server accepts connection using server/client model.
+When a client connects, the server replies with 2 ports.
+The first port is the same for all clients, and it is for pushing mass updates
+to all the clients.
+The second port is specific to each client, and on which the client will
+stream songs to the server.
