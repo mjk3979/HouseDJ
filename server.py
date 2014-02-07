@@ -25,20 +25,26 @@ def updateMasterQueue():
             if len(orderClients[ind].queue) >= songsFromEach:
                 masterQueue.append(orderClients[ind].queue[songsFromEach - 1])
 
-class Client:
-    __slots__=('clientdata', 'queue', 'index')
+class Client(Thread):
+    __slots__=('clientdata', 'queue', 'index', 'port')
 
-    def __init__(self, clientdata):
+    def __init__(self, clientdata, port)
         self.clientdata = clientdata
         self.queue = []
         self.index = getNewIndex()
+        self.port = port
 
-    def recieveMessage(self, message):
+    def handleMessage(self, message):
         # Queue update
         if (type(message) is list):
             self.queue = message
             updateMasterQueue()
 
+    def run():
+        mysock = context.socket(zmq.PAIR)
+        mysock.bind("tcp://*:%s" % (port,))
+        while True:
+            data = pickle.loads(zmq.recv())
 
 def recieveMessage():
     global socket, masterQueue, clients
