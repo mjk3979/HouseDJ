@@ -1,6 +1,7 @@
 import zmq
 import pickle
 from common import Song
+from threading import Thread
 
 clients = {}
 currentIndex = 0
@@ -28,7 +29,7 @@ def updateMasterQueue():
 class Client(Thread):
     __slots__=('clientdata', 'queue', 'index', 'port')
 
-    def __init__(self, clientdata, port)
+    def __init__(self, clientdata, port):
         self.clientdata = clientdata
         self.queue = []
         self.index = getNewIndex()
