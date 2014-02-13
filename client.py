@@ -16,31 +16,34 @@ SERVER_STREAM_PORT = 5556
 context = zmq.Context()
 myClientData = ClientData(input('Nickname: '))
 
-def sendMessage(data):
-    socket.send(pickle.dumps((myClientData, data)))	
-
-socket = context.socket(zmq.PAIR)
+socket = context.socket(zmq.REQ)
 socket.connect("tcp://%s:%s" % (SERVER_IP, SERVER_PORT))
+socket.send(pickle.dumps(myClientData))
+myPort = pickle.loads(socket.recv())
+socket.close()
+socket = context.socket(zmq.PAIR)
+socket.connect("tcp://%s:%s" %(SERVER_IP, myPort))
+
+def sendMessage(data):
+		socket.send(pickle.dumps(data)) 
 
 q = []
 while True:
-	title = input('Song: ')
-	if title == 'q':
-		break
-	else:
-		mp3 = EasyID3(title)
-		song = Song(mp3["title"][0],mp3["artist"][0])
-		print (song)
-		q.append(song)
-		sendMessage(q)
-		try:
-			f = open(title , "rb")
-			if f.readable():
-				print('the song is readable')
-				byte = f.read(500)
-				print('successfully read file')
-				while byte != 0:
-					#send the song here
-					byte = f.read(500)
-		finally:
-			f.close()
+		title = input('Song: ')
+		if title == 'q':
+				break
+		else:
+				mp3 = EasyID3(title)
+				song = Song(mp3["title"][0],mp3["artist"][0])
+				print (song)
+				q.append(song)
+				sendMessage(q)
+				try:
+						f = open(title , "rb")
+						if f.readable():
+								print('the song is readable')
+								bytez = f.read()
+								sendMessage(bytez)
+								print('successfully read file')
+				finally:
+						f.close()
