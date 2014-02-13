@@ -33,3 +33,14 @@ while True:
 		print (song)
 		q.append(song)
 		sendMessage(q)
+		try:
+			f = open(title , "rb")
+			if f.readable():
+				print('the song is readable')
+				byte = f.read(500)
+				print('successfully read file')
+				while byte != 0:
+					#send the song here
+					byte = f.read(500)
+		finally:
+			f.close()
