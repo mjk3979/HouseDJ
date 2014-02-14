@@ -2,12 +2,15 @@ import zmq
 import pickle
 from common import Song
 from threading import Thread
+import time
+import subprocess
 
 SERVER_IP = '127.0.0.1'
 clients = {}
 currentIndex = 0
 masterQueue = None
 socket = None
+songMap = {}
 
 def getNewIndex():
 	if len(clients) == 0:
@@ -42,8 +45,7 @@ class Client():
 			self.queue = message
 			updateMasterQueue()
 		else:
-			print(type(message))
-			print(message)
+					songMap[message[0]] = message[1]
 
 	def run(self):
 		context = zmq.Context()
