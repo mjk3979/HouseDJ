@@ -12,6 +12,21 @@ masterQueue = None
 socket = None
 songMap = {}
 
+def playerLoop():
+	while True:
+		if masterQueue != None and len(masterQueue) != 0 and masterQueue[0] in songMap:
+			song = masterQueue.pop(0)
+			songdata = songMap[song]
+			f = open('tempfile.mp3', 'wb')
+			f.write(songdata)
+			f.close()
+			# Hack for now
+			print("ABOUT TO PLAY")
+			p = subprocess.Popen(["mplayer", "tempfile.mp3"])
+			p.wait()
+		else:
+			time.sleep(.05)
+
 def getNewIndex():
 	if len(clients) == 0:
 		return 0
@@ -79,6 +94,7 @@ def main():
 	context = zmq.Context()
 	socket = context.socket(zmq.REP)
 	socket.bind("tcp://*:%s" % (port,))
+	Thread(target=playerLoop).start()
 	# Loop to recieve clients
 	clientLoop()
 
