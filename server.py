@@ -57,8 +57,8 @@ class Client():
 	def handleMessage(self, message):
 		# Queue update
 		if (type(message) is list):
-			self.queue = message
-			updateMasterQueue()
+					self.queue = message
+					updateMasterQueue()
 		else:
 					songMap[message[0]] = message[1]
 
