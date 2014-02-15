@@ -3,7 +3,7 @@ import pickle
 from common import Song
 from threading import Thread
 import time
-import subprocess
+import pygame
 
 SERVER_IP = '127.0.0.1'
 clients = {}
@@ -13,17 +13,17 @@ socket = None
 songMap = {}
 
 def playerLoop():
+	pygame.init()
 	while True:
-		if masterQueue != None and len(masterQueue) != 0 and masterQueue[0] in songMap:
+		if masterQueue != None and len(masterQueue) != 0 and masterQueue[0] in songMap and not(pygame.mixer.get_busy()):
 			song = masterQueue.pop(0)
 			songdata = songMap[song]
-			f = open('tempfile.mp3', 'wb')
-			f.write(songdata)
-			f.close()
-			# Hack for now
 			print("ABOUT TO PLAY")
-			p = subprocess.Popen(["mplayer", "tempfile.mp3"])
-			p.wait()
+			print(type(songdata))
+			song = pygame.mixer.Sound(array=songdata)
+			song.play()
+			print("STARTED")
+
 		else:
 			time.sleep(.05)
 
