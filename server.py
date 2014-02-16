@@ -16,6 +16,7 @@ masterQueue = None
 socket = None
 songMap = {}
 queueLock = Lock()
+publishLock = Lock()
 
 
 PUBLISH_PORT = 5556
@@ -25,12 +26,23 @@ contextPub = zmq.Context()
 socketPub = contextPub.socket(zmq.PUB)
 socketPub.bind("tcp://*:%s" % (PUBLISH_PORT,))
 
+def incCurrentIndex():
+	global currentIndex
+	currentIndex = (currentIndex + 1) % len(clients)
 
 def playerLoop():
+	global currentIndex, masterQueue, songMap
 	pygame.mixer.init(44100)
 	while True:
-		if masterQueue != None and len(masterQueue) != 0 and masterQueue[0] in songMap and not(pygame.mixer.get_busy()):
-			song = masterQueue.pop(0)
+		if masterQueue != None and len(masterQueue) != 0 and masterQueue[0][1] in songMap and not(pygame.mixer.get_busy()):
+			print("HERE")
+			cli, song = masterQueue.pop(0)
+			cli.lock.acquire()
+			cli.queue.pop(0)
+			cli.lock.release()
+			currentIndex = cli.index
+			incCurrentIndex()
+			updateMasterQueue()
 			songdata = songMap[song]
 			print("CONVERTING")
 			aseg = AudioSegment.from_file(BytesIO(songdata))
@@ -47,8 +59,10 @@ def playerLoop():
 			time.sleep(.1)
 
 def publishQueue():
-	global socketPub
-	socketPub.send(pickle.dumps(masterQueue))
+	global socketPub, publishLock
+	publishLock.acquire()
+	socketPub.send(pickle.dumps([(cli.clientdata, song) for (cli, song) in masterQueue]))
+	publishLock.release()
 
 
 def getNewIndex():
@@ -64,30 +78,34 @@ def updateMasterQueue():
 	songsFromEach = 0
 	orderClients = [c for (i,c) in sorted((cli.index, cli) for cli in clients.values())]
 	while songsFromEach < max(len(c.queue) for c in orderClients):
+		print("HERE")
 		songsFromEach += 1
 		for ci in range(len(orderClients)):
 			ind = (i + ci) % len(orderClients)
 		if len(orderClients[ind].queue) >= songsFromEach:
-			masterQueue.append(orderClients[ind].queue[songsFromEach - 1])
+			masterQueue.append((orderClients[ind], orderClients[ind].queue[songsFromEach - 1]))
 	publishQueue()
 	queueLock.release()
 
 class Client():
-	__slots__=('clientdata', 'queue', 'index', 'port')
+	__slots__=('clientdata', 'queue', 'index', 'port', 'lock')
 
 	def __init__(self, clientdata, port):
 		self.clientdata = clientdata
 		self.queue = []
 		self.index = getNewIndex()
 		self.port = port
+		self.lock = Lock()
 
 	def handleMessage(self, message):
+		self.lock.acquire()
 		# Queue update
-		if (type(message) is list):
-			self.queue = message
+		if (type(message) is Song):
+			self.queue.append(message)
 			updateMasterQueue()
 		else:
 			songMap[message[0]] = message[1]
+		self.lock.release()
 
 	def run(self):
 		context = zmq.Context()

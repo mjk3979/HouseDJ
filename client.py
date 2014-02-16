@@ -32,12 +32,9 @@ qSocket.connect("tcp://%s:%s" % (SERVER_IP,SERVER_PUB_PORT))
 qSocket.setsockopt_string(zmq.SUBSCRIBE, '') 
 
 def listenMasterQueue():
-		global qSocket
+		global qSocket, masterQueue
 		while True:
 			masterQueue = pickle.loads(qSocket.recv())
-			print("got new Master Queue")
-			for song in masterQueue:
-				print(song)
 
 Thread(target=listenMasterQueue).start()
 
@@ -53,14 +50,13 @@ while True:
 		break
 	elif title == 'v':
 			print("Master Queue:")
-			for songTitle in masterQueue:
-				print(songTitle)	
+			for (cli, songTitle) in masterQueue:
+				print(cli.nickname + ": " + str(songTitle))
 	else:
 		mp3 = EasyID3(title)
 		song = Song(mp3["title"][0],mp3["artist"][0])
 		print (song)
-		q.append(song)
-		sendMessage(q)
+		sendMessage(song)
 		try:
 			f = open(title , "rb")
 			if f.readable():
