@@ -7,7 +7,7 @@ import time
 import pygame
 from pydub import AudioSegment
 from io import BytesIO
-
+import sys
 
 SERVER_IP = '127.0.0.1'
 clients = {}
@@ -131,11 +131,10 @@ def clientLoop():
 			newClient = Client(clientdata,listenNewPort())
 			clients[clientdata] = newClient
 			Thread(target=clients[clientdata].run).start()
-		socket.send(pickle.dumps(clients[clientdata].port))
+		socket.send(pickle.dumps((clients[clientdata].port,PUBLISH_PORT)))
 
-def main():
+def main(port):
 	global socket
-	port = 5555
 	context = zmq.Context()
 	socket = context.socket(zmq.REP)
 	socket.bind("tcp://*:%s" % (port,))
@@ -144,4 +143,4 @@ def main():
 	clientLoop()
 
 if __name__ == '__main__':
-	main()
+	main(sys.argv[1])
