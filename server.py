@@ -2,6 +2,7 @@ import zmq
 import pickle
 from common import Song
 from threading import Thread
+from threading import Lock
 import time
 import pygame
 from pydub import AudioSegment
@@ -13,6 +14,7 @@ currentIndex = 0
 masterQueue = None
 socket = None
 songMap = {}
+queueLock = Lock()
 
 def playerLoop():
 	pygame.mixer.init(44100)
@@ -41,7 +43,8 @@ def getNewIndex():
 	return max(c.index for c in clients.values()) + 1
 
 def updateMasterQueue():
-	global masterQueue, currentIndex, clients
+	global masterQueue, currentIndex, clients, queueLock
+	queueLock.acquire()
 	masterQueue = []
 	i = currentIndex
 	songsFromEach = 0
@@ -52,6 +55,7 @@ def updateMasterQueue():
 			ind = (i + ci) % len(orderClients)
 		if len(orderClients[ind].queue) >= songsFromEach:
 			masterQueue.append(orderClients[ind].queue[songsFromEach - 1])
+	queueLock.release()
 
 class Client():
 	__slots__=('clientdata', 'queue', 'index', 'port')
