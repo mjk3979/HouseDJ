@@ -49,14 +49,12 @@ def inputLoop():
 			break
 		elif title == 'v':
 				print("Master Queue:")
-				for songTitle in masterQueue:
-					print(songTitle)	
+				for cli, song in masterQueue:
+					print(cli.nickname + ": " + str(song))
 		else:
 			mp3 = EasyID3(title)
 			song = Song(mp3["title"][0],mp3["artist"][0])
-			print (song)
-			q.append(song)
-			sendMessage(q)
+			sendMessage(song)
 			try:
 				f = open(title , "rb")
 				if f.readable():
