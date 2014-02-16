@@ -36,8 +36,6 @@ def listenMasterQueue():
 		while True:
 			masterQueue = pickle.loads(qSocket.recv())
 
-
-
 def sendMessage(data):
 	socket.send(pickle.dumps(data)) 
 
