@@ -24,7 +24,6 @@ def playerLoop():
 			songdata = songMap[song]
 			print("CONVERTING")
 			aseg = AudioSegment.from_file(BytesIO(songdata))
-			aseg = aseg.reverse()
 			songdata = BytesIO()
 			aseg.export(songdata, format="wav", bitrate="44.1k")
 			print("ABOUT TO PLAY")
