@@ -4,6 +4,8 @@ from common import Song
 from threading import Thread
 import time
 import pygame
+from pydub import AudioSegment
+from io import BytesIO
 
 SERVER_IP = '127.0.0.1'
 clients = {}
@@ -13,14 +15,20 @@ socket = None
 songMap = {}
 
 def playerLoop():
-	pygame.init()
+	pygame.mixer.init(44100)
 	while True:
 		if masterQueue != None and len(masterQueue) != 0 and masterQueue[0] in songMap and not(pygame.mixer.get_busy()):
 			song = masterQueue.pop(0)
 			songdata = songMap[song]
+			print("CONVERTING")
+			aseg = AudioSegment.from_file(BytesIO(songdata))
+			aseg = aseg.reverse()
+			songdata = BytesIO()
+			aseg.export(songdata, format="wav", bitrate="44.1k")
 			print("ABOUT TO PLAY")
-			print(type(songdata))
-			song = pygame.mixer.Sound(array=songdata)
+			songdata.seek(0)
+			songdata = songdata.read()
+			song = pygame.mixer.Sound(songdata)
 			song.play()
 			print("STARTED")
 
