@@ -34,7 +34,7 @@ def playerLoop():
 			print("STARTED")
 
 		else:
-			time.sleep(.05)
+			time.sleep(.1)
 
 def getNewIndex():
 	if len(clients) == 0:
