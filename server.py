@@ -8,6 +8,7 @@ import pygame
 from pydub import AudioSegment
 from io import BytesIO
 
+
 SERVER_IP = '127.0.0.1'
 clients = {}
 currentIndex = 0
@@ -15,6 +16,15 @@ masterQueue = None
 socket = None
 songMap = {}
 queueLock = Lock()
+
+
+PUBLISH_PORT = 5556
+
+
+contextPub = zmq.Context()
+socketPub = contextPub.socket(zmq.PUB)
+socketPub.bind("tcp://*:%s" % (PUBLISH_PORT,))
+
 
 def playerLoop():
 	pygame.mixer.init(44100)
@@ -36,6 +46,11 @@ def playerLoop():
 		else:
 			time.sleep(.1)
 
+def publishQueue():
+	global socketPub
+	socketPub.send(pickle.dumps(masterQueue))
+
+
 def getNewIndex():
 	if len(clients) == 0:
 		return 0
@@ -54,6 +69,7 @@ def updateMasterQueue():
 			ind = (i + ci) % len(orderClients)
 		if len(orderClients[ind].queue) >= songsFromEach:
 			masterQueue.append(orderClients[ind].queue[songsFromEach - 1])
+	publishQueue()
 	queueLock.release()
 
 class Client():
@@ -68,10 +84,10 @@ class Client():
 	def handleMessage(self, message):
 		# Queue update
 		if (type(message) is list):
-					self.queue = message
-					updateMasterQueue()
+			self.queue = message
+			updateMasterQueue()
 		else:
-					songMap[message[0]] = message[1]
+			songMap[message[0]] = message[1]
 
 	def run(self):
 		context = zmq.Context()
