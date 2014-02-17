@@ -6,6 +6,8 @@ from mutagenx.easyid3 import EasyID3
 import sys
 from threading import Thread
 import time
+from os import path
+
 
 masterQueue = []
 qSocket = None
@@ -87,18 +89,30 @@ def inputLoop():
 			choice2 = int(input("Which one: "))
 			sendMessage(QueueUpdate(COMMAND_MOVE, (myq[choice1], myq[choice2])))
 
+def checkDirExists(musicDir):
+	if(path.exists(musicDir) and path.isdir(musicDir)):
+		pass	
+
 def main():
 	argc = len(sys.argv)
-	if (argc <= 1):
-		host = "localhost"
+	if((argc < 2) or  (argc > 4)):
+		print("USAGE: python3.3 client.py musicDir [host] [port]")
 	else:
-		host = sys.argv[1]
-	if (argc <= 2):
-		port = 5555
-	else:
-		port = int(sys.argv[2])
-	init(host,port)
-	inputLoop()		
+		if(argc == 2):
+			musicDir = sys.argv[1]
+			host = "localhost"
+			port = 5555
+		if (argc == 3):
+			musicDir = sys.argv[1]
+			host = sys.argv[2]
+			port = 5555
+		if (argc == 4):
+			musicDir = sys.argv[1]
+			host = sys.argv[2]
+			port = sys.argv[3]
+		checkDirExists(musicDir)
+		init(host,port)
+		inputLoop()		
 
 if __name__ == '__main__':
 	main()
