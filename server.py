@@ -5,8 +5,6 @@ from threading import Thread
 from threading import Lock
 import time
 import pygame
-from pydub import AudioSegment
-from io import BytesIO
 import sys
 from MasterQueue import *
 from copy import deepcopy
@@ -37,13 +35,7 @@ def playerLoop():
 			cli, song = masterQueue.pop()
 			publishQueue()
 			songdata = songMap[song]
-			print("CONVERTING")
-			aseg = AudioSegment.from_file(BytesIO(songdata))
-			songdata = BytesIO()
-			aseg.export(songdata, format="wav", bitrate="44.1k")
 			print("ABOUT TO PLAY")
-			songdata.seek(0)
-			songdata = songdata.read()
 			song = pygame.mixer.Sound(songdata)
 			song.play()
 			print("STARTED")

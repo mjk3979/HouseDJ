@@ -8,6 +8,8 @@ from threading import Thread
 import time
 from cmdline import *
 from groovesharkplugin import GroovesharkPlugin
+from pydub import AudioSegment
+from io import BytesIO
 
 masterQueue = []
 qSocket = None
@@ -72,8 +74,14 @@ def inputLoop():
 			elif i==1:
 				song = gplugin.pickSong()
 				bytez = gplugin.getSongData(song)
+			print("CONVERTING")
+			aseg = AudioSegment.from_file(BytesIO(bytez))
+			songdata = BytesIO()
+			aseg.export(songdata, format="wav", bitrate="44.1k")
+			songdata.seek(0)
+			songdata = songdata.read()
 			sendMessage(QueueUpdate(COMMAND_ADD,song))
-			sendMessage((song,bytez))
+			sendMessage((song,songdata))
 		elif com == 'd':
 			sendMessage(None)
 			myq = pickle.loads(socket.recv())
