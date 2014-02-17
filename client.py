@@ -6,6 +6,8 @@ from mutagenx.easyid3 import EasyID3
 import sys
 from threading import Thread
 import time
+from cmdline import *
+from groovesharkplugin import GroovesharkPlugin
 
 masterQueue = []
 qSocket = None
@@ -39,7 +41,7 @@ def sendMessage(data):
 	socket.send(pickle.dumps(data)) 
 
 def inputLoop():		
-	q = []
+	gplugin = GroovesharkPlugin()
 	while True:
 		print('a: Add')
 		print('d: Delete')
@@ -54,19 +56,24 @@ def inputLoop():
 				for cli, song in masterQueue:
 					print(cli.nickname + ": " + str(song))
 		elif com == 'a':
-			title = input('File: ')
-			mp3 = EasyID3(title)
-			song = Song(mp3["title"][0],mp3["artist"][0])
+			i, _ = inputChoice(["From File", "Grooveshark"])
+			if i==0:
+				title = input('File: ')
+				mp3 = EasyID3(title)
+				song = Song(mp3["title"][0],mp3["artist"][0])
+				try:
+					f = open(title , "rb")
+					if f.readable():
+						print('the song is readable')
+						bytez = f.read()
+						print('successfully read file')
+				finally:
+					f.close()
+			elif i==1:
+				song = gplugin.pickSong()
+				bytez = gplugin.getSongData(song)
 			sendMessage(QueueUpdate(COMMAND_ADD,song))
-			try:
-				f = open(title , "rb")
-				if f.readable():
-					print('the song is readable')
-					bytez = f.read()
-					sendMessage((song,bytez))
-					print('successfully read file')
-			finally:
-				f.close()
+			sendMessage((song,bytez))
 		elif com == 'd':
 			sendMessage(None)
 			myq = pickle.loads(socket.recv())
