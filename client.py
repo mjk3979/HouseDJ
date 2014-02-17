@@ -1,7 +1,6 @@
 #!usr/bin/python
 import zmq
-from common import Song
-from common import ClientData
+from common import *
 import pickle
 from mutagenx.easyid3 import EasyID3
 import sys
@@ -42,17 +41,23 @@ def sendMessage(data):
 def inputLoop():		
 	q = []
 	while True:
-		title = input('Song: ')
-		if title == 'q':
+		print('a: Add')
+		print('d: Delete')
+		print('m: Move')
+		print('v: View Master Queue')
+		print('q: Quit')
+		com = input('Command: ').lower()
+		if com == 'q':
 			break
-		elif title == 'v':
+		elif com == 'v':
 				print("Master Queue:")
 				for cli, song in masterQueue:
 					print(cli.nickname + ": " + str(song))
-		else:
+		elif com == 'a':
+			title = input('File: ')
 			mp3 = EasyID3(title)
 			song = Song(mp3["title"][0],mp3["artist"][0])
-			sendMessage(song)
+			sendMessage(QueueUpdate(COMMAND_ADD,song))
 			try:
 				f = open(title , "rb")
 				if f.readable():
@@ -62,6 +67,25 @@ def inputLoop():
 					print('successfully read file')
 			finally:
 				f.close()
+		elif com == 'd':
+			sendMessage(None)
+			myq = pickle.loads(socket.recv())
+			i = 0
+			for s in myq:
+				print(str(i) + ": " + str(s))
+				i+=1
+			choice = int(input("Which one: "))
+			sendMessage(QueueUpdate(COMMAND_DELETE, myq[choice]))
+		elif com == 'm':
+			sendMessage(None)
+			myq = pickle.loads(socket.recv())
+			i = 0
+			for s in myq:
+				print(str(i) + ": " + str(s))
+				i+=1
+			choice1 = int(input("Which one: "))
+			choice2 = int(input("Which one: "))
+			sendMessage(QueueUpdate(COMMAND_MOVE, (myq[choice1], myq[choice2])))
 
 def main():
 	argc = len(sys.argv)

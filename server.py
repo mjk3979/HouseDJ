@@ -1,6 +1,6 @@
 import zmq
 import pickle
-from common import Song
+from common import *
 from threading import Thread
 from threading import Lock
 import time
@@ -58,7 +58,7 @@ def publishQueue():
 	publishLock.release()
 
 class Client():
-	__slots__=('clientdata', 'queue', 'port', 'lock')
+	__slots__=('clientdata', 'queue', 'port', 'lock', 'sock')
 
 	def __init__(self, clientdata, port):
 		self.clientdata = clientdata
@@ -66,24 +66,39 @@ class Client():
 		self.port = port
 		self.lock = Lock()
 
+	def handleQueueUpdate(self, qupdate):
+		com = qupdate.command
+		if com == COMMAND_ADD:
+			self.queue.append(qupdate.data)
+		elif com == COMMAND_MOVE:
+			song1, song2 = qupdate.data
+			ind1, ind2 = self.queue.index(song1), self.queue.index(song2)
+			self.queue[ind1], self.queue[ind2] = song2, song1
+		elif com == COMMAND_DELETE:
+			self.queue.pop(self.queue.index(qupdate.data))
+
 	def handleMessage(self, message):
 		# Queue update
-		if (type(message) is Song):
+		if (type(message) is QueueUpdate):
 			self.lock.acquire()
-			self.queue.append(message)
+			self.handleQueueUpdate(message)
 			self.lock.release()
 			publishQueue()
-		else:
+		elif type(message) is tuple:
 			self.lock.acquire()
 			songMap[message[0]] = message[1]
+			self.lock.release()
+		elif message == None:
+			self.lock.acquire()
+			self.sock.send(pickle.dumps(self.queue))
 			self.lock.release()
 
 	def run(self):
 		context = zmq.Context()
-		mysock = context.socket(zmq.PAIR)
-		mysock.bind("tcp://*:%s" % (self.port,))
+		self.sock = context.socket(zmq.PAIR)
+		self.sock.bind("tcp://*:%s" % (self.port,))
 		while True:
-			data = pickle.loads(mysock.recv())
+			data = pickle.loads(self.sock.recv())
 			self.handleMessage(data)
 
 	def __deepcopy__(self, memo):

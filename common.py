@@ -28,3 +28,14 @@ class ClientData:
 
     def __eq__(self, other):
         return self.nickname == other.nickname
+
+COMMAND_ADD = 0
+COMMAND_MOVE = 1
+COMMAND_DELETE = 2
+
+class QueueUpdate:
+	__slots__=('command', 'data')
+
+	def __init__(self, command, data):
+		self.command = command
+		self.data = data
