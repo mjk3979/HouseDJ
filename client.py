@@ -63,9 +63,18 @@ def inputLoop():
 			finally:
 				f.close()
 
-def main(host,port):
+def main():
+	argc = len(sys.argv)
+	if (argc <= 1):
+		host = "localhost"
+	else:
+		host = sys.argv[1]
+	if (argc <= 2):
+		port = 5555
+	else:
+		port = int(sys.argv[2])
 	init(host,port)
 	inputLoop()		
 
 if __name__ == '__main__':
-	main(sys.argv[1],sys.argv[2])
+	main()

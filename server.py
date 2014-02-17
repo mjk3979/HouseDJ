@@ -110,8 +110,13 @@ def clientLoop():
 			Thread(target=clients[clientdata].run).start()
 		socket.send(pickle.dumps((clients[clientdata].port,PUBLISH_PORT)))
 
-def main(port):
+def main():
 	global socket
+	argc = len(sys.argv)
+	if (argc <= 1):
+		port = 5555
+	else:
+		port = int(sys.argv[1])
 	context = zmq.Context()
 	socket = context.socket(zmq.REP)
 	socket.bind("tcp://*:%s" % (port,))
@@ -120,4 +125,4 @@ def main(port):
 	clientLoop()
 
 if __name__ == '__main__':
-	main(sys.argv[1])
+	main()
