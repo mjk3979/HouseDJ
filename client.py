@@ -77,9 +77,10 @@ def inputLoop():
 			print("CONVERTING")
 			aseg = AudioSegment.from_file(BytesIO(bytez))
 			songdata = BytesIO()
-			aseg.export(songdata, format="wav", bitrate="44.1k")
+			aseg.export(songdata, format="ogg")
 			songdata.seek(0)
 			songdata = songdata.read()
+			print(len(songdata))
 			sendMessage(QueueUpdate(COMMAND_ADD,song))
 			sendMessage((song,songdata))
 		elif com == 'd':

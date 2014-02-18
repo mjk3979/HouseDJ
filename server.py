@@ -8,6 +8,7 @@ import pygame
 import sys
 from MasterQueue import *
 from copy import deepcopy
+from io import BytesIO
 
 SERVER_IP = '127.0.0.1'
 clients = {}
@@ -34,15 +35,15 @@ def playerLoop():
 			print("HERE")
 			cli, song = masterQueue.pop()
 			publishQueue()
-			songdata = songMap[song]
+			songdata = BytesIO(songMap[song])
 			del songMap[song]
 			print("ABOUT TO PLAY")
-			song = pygame.mixer.Sound(songdata)
-			song.play()
+			pygame.mixer.music.load(songdata)
+			pygame.mixer.music.play()
 			print("STARTED")
 
 		else:
-			time.sleep(.1)
+			time.sleep(.5)
 
 def publishQueue():
 	global socketPub, publishLock
@@ -92,6 +93,7 @@ class Client():
 		self.sock = context.socket(zmq.PAIR)
 		self.sock.bind("tcp://*:%s" % (self.port,))
 		while True:
+			print("looping")
 			data = pickle.loads(self.sock.recv())
 			self.handleMessage(data)
 
