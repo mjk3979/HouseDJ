@@ -35,6 +35,7 @@ def playerLoop():
 			cli, song = masterQueue.pop()
 			publishQueue()
 			songdata = songMap[song]
+			del songMap[song]
 			print("ABOUT TO PLAY")
 			song = pygame.mixer.Sound(songdata)
 			song.play()
@@ -77,6 +78,7 @@ class Client():
 			self.lock.release()
 			publishQueue()
 		elif type(message) is tuple:
+			print("got song data")
 			self.lock.acquire()
 			songMap[message[0]] = message[1]
 			self.lock.release()
