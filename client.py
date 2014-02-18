@@ -77,7 +77,7 @@ def inputLoop():
 			print("CONVERTING")
 			aseg = AudioSegment.from_file(BytesIO(bytez))
 			songdata = BytesIO()
-			aseg.export(songdata, format="ogg")
+			aseg.export(songdata, format="mp3")
 			songdata.seek(0)
 			songdata = songdata.read()
 			print(len(songdata))

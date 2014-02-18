@@ -31,7 +31,7 @@ def playerLoop():
 	global currentIndex, masterQueue, songMap
 	pygame.mixer.init(44100)
 	while True:
-		if masterQueue.peek() != None and masterQueue.peek()[1] in songMap and not(pygame.mixer.get_busy()):
+		if masterQueue.peek() != None and masterQueue.peek()[1] in songMap and not(pygame.mixer.music.get_busy()):
 			print("HERE")
 			cli, song = masterQueue.pop()
 			publishQueue()
