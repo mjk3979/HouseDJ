@@ -14,7 +14,7 @@ class GroovesharkPlugin:
 
 	def getSongRec(self, lst):
 		lst = list(lst)
-		i, _ = inputChoice(list(res.name for res in lst))
+		i, _ = inputChoice(list(res.name + " by " + res.artist.name if type(res) == grooveshark.classes.Song else res.name for res in lst))
 		c = lst[i]
 		if type(c) is grooveshark.classes.Song:
 			return c
