@@ -90,15 +90,20 @@ class Client():
 			self.sock.send(pickle.dumps(self.queue))
 			self.lock.release()
 		elif type(message) == PlayerCommand:
+			self.lock.acquire()
 			if message.cmd == PLAYER_PAUSE:
-				self.lock.acquire()
 				if paused:
 					pygame.mixer.music.unpause()
 					paused = False
 				else:
 					pygame.mixer.music.pause()
 					paused = True
-				self.lock.release()
+			elif message.cmd == PLAYER_VOLUME_UP:
+				pygame.mixer.music.set_volume(min(pygame.mixer.music.get_volume() + 0.02, 1.0))
+			elif message.cmd == PLAYER_VOLUME_DOWN:
+				pygame.mixer.music.set_volume(max(pygame.mixer.music.get_volume() - 0.02, 0.0))
+			self.lock.release()
+
 
 	def run(self):
 		context = zmq.Context()
