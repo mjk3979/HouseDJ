@@ -119,7 +119,7 @@ def clientLoop():
 			clients[clientdata] = newClient
 			masterQueue.addClient(newClient)
 			Thread(target=clients[clientdata].run).start()
-		socket.send(pickle.dumps((clients[clientdata].port,PUBLISH_PORT)))
+		socket.send(pickle.dumps((clients[clientdata].port,PUBLISH_PORT,masterQueue.toList())))
 
 def main():
 	global socket
