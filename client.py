@@ -16,7 +16,7 @@ socket = None
 shouldHalt = False
 
 def init(host,port):
-	global qSocket, socket
+	global qSocket, socket, masterQueue
 	context = zmq.Context()
 	myClientData = ClientData(input('Nickname: '))
 
@@ -33,6 +33,8 @@ def init(host,port):
 	qSocket.connect("tcp://%s:%s" % (host,ports[1])) 
 	qSocket.setsockopt_string(zmq.SUBSCRIBE, '') 
 	Thread(target=listenMasterQueue).start()
+
+	masterQueue = ports[2]
 
 def listenMasterQueue():
 		global shouldHalt, qSocket, masterQueue
