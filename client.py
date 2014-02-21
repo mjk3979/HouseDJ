@@ -5,6 +5,7 @@ import pickle
 from mutagenx.easyid3 import EasyID3
 import sys
 from threading import Thread
+from time import sleep
 import time
 from os import path
 
@@ -12,6 +13,7 @@ from os import path
 masterQueue = []
 qSocket = None
 socket = None
+shouldHalt = False
 
 def init(host,port):
 	global qSocket, socket
@@ -33,9 +35,12 @@ def init(host,port):
 	Thread(target=listenMasterQueue).start()
 
 def listenMasterQueue():
-		global qSocket, masterQueue
-		while True:
-			masterQueue = pickle.loads(qSocket.recv())
+		global shouldHalt, qSocket, masterQueue
+		while not(shouldHalt):
+			try:
+				masterQueue = pickle.loads(qSocket.recv(flags=zmq.NOBLOCK))
+			except zmq.ZMQError:
+				sleep(.2)
 
 def sendMessage(data):
 	socket.send(pickle.dumps(data)) 
@@ -94,6 +99,7 @@ def checkDirExists(musicDir):
 		pass	
 
 def main():
+	global shouldHalt
 	argc = len(sys.argv)
 	if((argc < 2) or  (argc > 4)):
 		print("USAGE: python3.3 client.py musicDir [host] [port]")
@@ -111,8 +117,9 @@ def main():
 			host = sys.argv[2]
 			port = sys.argv[3]
 		checkDirExists(musicDir)
-		init(host,port)
-		inputLoop()		
+	init(host,port)
+	inputLoop()		
+	shouldHalt = True
 
 if __name__ == '__main__':
 	main()
