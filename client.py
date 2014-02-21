@@ -5,15 +5,18 @@ import pickle
 from mutagenx.easyid3 import EasyID3
 import sys
 from threading import Thread
+from time import sleep
 import time
 from cmdline import *
 from groovesharkplugin import GroovesharkPlugin
 from pydub import AudioSegment
 from io import BytesIO
+from os import path
 
 masterQueue = []
 qSocket = None
 socket = None
+shouldHalt = False
 
 def init(host,port):
 	global qSocket, socket
@@ -35,9 +38,12 @@ def init(host,port):
 	Thread(target=listenMasterQueue).start()
 
 def listenMasterQueue():
-		global qSocket, masterQueue
-		while True:
-			masterQueue = pickle.loads(qSocket.recv())
+		global shouldHalt, qSocket, masterQueue
+		while not(shouldHalt):
+			try:
+				masterQueue = pickle.loads(qSocket.recv(flags=zmq.NOBLOCK))
+			except zmq.ZMQError:
+				sleep(.2)
 
 def sendMessage(data):
 	socket.send(pickle.dumps(data)) 
@@ -103,18 +109,32 @@ def inputLoop():
 			choice2 = int(input("Which one: "))
 			sendMessage(QueueUpdate(COMMAND_MOVE, (myq[choice1], myq[choice2])))
 
+def checkDirExists(musicDir):
+	if(path.exists(musicDir) and path.isdir(musicDir)):
+		pass	
+
 def main():
+	global shouldHalt
 	argc = len(sys.argv)
-	if (argc <= 1):
-		host = "localhost"
+	if((argc < 2) or  (argc > 4)):
+		print("USAGE: python3.3 client.py musicDir [host] [port]")
 	else:
-		host = sys.argv[1]
-	if (argc <= 2):
-		port = 5555
-	else:
-		port = int(sys.argv[2])
+		if(argc == 2):
+			musicDir = sys.argv[1]
+			host = "localhost"
+			port = 5555
+		if (argc == 3):
+			musicDir = sys.argv[1]
+			host = sys.argv[2]
+			port = 5555
+		if (argc == 4):
+			musicDir = sys.argv[1]
+			host = sys.argv[2]
+			port = sys.argv[3]
+		checkDirExists(musicDir)
 	init(host,port)
 	inputLoop()		
+	shouldHalt = True
 
 if __name__ == '__main__':
 	main()
