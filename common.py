@@ -39,3 +39,13 @@ class QueueUpdate:
 	def __init__(self, command, data):
 		self.command = command
 		self.data = data
+
+PLAYER_PAUSE = 0
+PLAYER_VOLUME_UP = 1
+PLAYER_VOLUME_DOWN = 2
+
+class PlayerCommand:
+	__slots__=('cmd')
+
+	def __init__(self, cmd):
+		self.cmd = cmd

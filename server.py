@@ -18,6 +18,7 @@ socket = None
 songMap = {}
 queueLock = Lock()
 publishLock = Lock()
+paused = False
 
 
 PUBLISH_PORT = 5556
@@ -28,7 +29,7 @@ socketPub = contextPub.socket(zmq.PUB)
 socketPub.bind("tcp://*:%s" % (PUBLISH_PORT,))
 
 def playerLoop():
-	global currentIndex, masterQueue, songMap
+	global currentIndex, masterQueue, songMap, paused
 	pygame.mixer.init(44100)
 	while True:
 		if masterQueue.peek() != None and masterQueue.peek()[1] in songMap and not(pygame.mixer.music.get_busy()):
@@ -72,6 +73,7 @@ class Client():
 			self.queue.pop(self.queue.index(qupdate.data))
 
 	def handleMessage(self, message):
+		global paused
 		# Queue update
 		if (type(message) is QueueUpdate):
 			self.lock.acquire()
@@ -87,6 +89,16 @@ class Client():
 			self.lock.acquire()
 			self.sock.send(pickle.dumps(self.queue))
 			self.lock.release()
+		elif type(message) == PlayerCommand:
+			if message.cmd == PLAYER_PAUSE:
+				self.lock.acquire()
+				if paused:
+					pygame.mixer.music.unpause()
+					paused = False
+				else:
+					pygame.mixer.music.pause()
+					paused = True
+				self.lock.release()
 
 	def run(self):
 		context = zmq.Context()

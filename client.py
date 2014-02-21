@@ -57,6 +57,7 @@ def inputLoop():
 		print('d: Delete')
 		print('m: Move')
 		print('v: View Master Queue')
+		print('p: Pause')
 		print('q: Quit')
 		com = input('Command: ').lower()
 		if com == 'q':
@@ -110,6 +111,8 @@ def inputLoop():
 			choice1 = int(input("Which one: "))
 			choice2 = int(input("Which one: "))
 			sendMessage(QueueUpdate(COMMAND_MOVE, (myq[choice1], myq[choice2])))
+		elif com == 'p':
+			sendMessage(PlayerCommand(PLAYER_PAUSE))
 
 def checkDirExists(musicDir):
 	if(path.exists(musicDir) and path.isdir(musicDir)):
