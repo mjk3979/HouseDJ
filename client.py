@@ -103,6 +103,7 @@ def main():
 	argc = len(sys.argv)
 	if((argc < 2) or  (argc > 4)):
 		print("USAGE: python3.3 client.py musicDir [host] [port]")
+		exit(1)
 	else:
 		if(argc == 2):
 			musicDir = sys.argv[1]
