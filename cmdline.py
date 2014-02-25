@@ -9,3 +9,5 @@ def inputChoice(lst):
 		choice = int(input("Choice: "))
 		if choice >= 1 and choice <= len(lst):
 			return (choice - 1, lst[choice-1])
+		else:
+			return None
