@@ -14,6 +14,9 @@ class GroovesharkPlugin:
 
 	def getSongRec(self, lst):
 		lst = list(lst)
+		if len(lst) == 0:
+			print("Sorry Charlie.  No Results.")
+			return None
 		i, _ = inputChoice(list(res.name + " by " + res.artist.name if type(res) == grooveshark.classes.Song else res.name for res in lst))
 		c = lst[i]
 		if type(c) is grooveshark.classes.Song:
@@ -21,10 +24,16 @@ class GroovesharkPlugin:
 		return self.getSongRec(self, c.songs)
 
 	def pickSong(self):
-		typ, _ = inputChoice(["Song", "Artist", "Album"])
+		responseTuple = inputChoice(["Song", "Artist", "Album"])
+		if responseTuple == None:
+			return None
+		else:
+			typ,_ = responseTuple
 		typ = [Client.SONGS, Client.ARTISTS, Client.ALBUMS][typ]
 		search = input('Grooveshark search: ')
 		song = self.getSongRec(self.client.search(search, typ))
+		if song == None:
+			return None
 		retval = Song(song.name, song.artist.name)
 		self.songmap[retval] = song.safe_download()
 		return retval

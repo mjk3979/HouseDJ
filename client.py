@@ -66,7 +66,11 @@ def inputLoop():
 				for cli, song in masterQueue:
 					print(cli.nickname + ": " + str(song))
 		elif com == 'a':
-			i, _ = inputChoice(["From File", "Grooveshark"])
+			responseTuple = inputChoice(["From File", "Grooveshark"])
+			if responseTuple == None:
+				continue
+			else:
+				i,_ = responseTuple
 			if i==0:
 				title = input('File: ')
 				mp3 = EasyID3(title)
@@ -81,7 +85,10 @@ def inputLoop():
 					f.close()
 			elif i==1:
 				song = gplugin.pickSong()
-				bytez = gplugin.getSongData(song)
+				if song == None:
+					continue
+				else:
+					bytez = gplugin.getSongData(song)
 			print("CONVERTING")
 			aseg = AudioSegment.from_file(BytesIO(bytez))
 			songdata = BytesIO()
@@ -94,22 +101,49 @@ def inputLoop():
 		elif com == 'd':
 			sendMessage(None)
 			myq = pickle.loads(socket.recv())
+			if len(myq) == 0:
+				print("Can't delete current song!")
+				continue
 			i = 0
 			for s in myq:
 				print(str(i) + ": " + str(s))
 				i+=1
-			choice = int(input("Which one: "))
-			sendMessage(QueueUpdate(COMMAND_DELETE, myq[choice]))
+			choice = input("Which one: ")
+			try:
+				choice = int(choice)
+				if choice > (i-1) or choice < 0:
+					print("please enter a valid index")
+				else:
+					sendMessage(QueueUpdate(COMMAND_DELETE, myq[choice]))
+			except ValueError:
+				print("Please input an integer")
 		elif com == 'm':
 			sendMessage(None)
 			myq = pickle.loads(socket.recv())
+			if len(myq) == 0:
+				print("Can't move song.  No songs in queue")
+				continue
 			i = 0
 			for s in myq:
 				print(str(i) + ": " + str(s))
 				i+=1
-			choice1 = int(input("Which one: "))
-			choice2 = int(input("Which one: "))
-			sendMessage(QueueUpdate(COMMAND_MOVE, (myq[choice1], myq[choice2])))
+			choice1 = input("Which one: ")
+			try:
+				choice1 = int(choice1)
+				if choice1 > (i-1) or choice1 < 0:
+					print("please enter a valid index")
+				else:
+					choice2 = input("Which one: ")
+					try:
+						choice2 = int(choice2)
+						if choice2 > i or choice2 < 0:
+							print("please enter a valid index")
+						else:
+							sendMessage(QueueUpdate(COMMAND_MOVE, (myq[choice1], myq[choice2])))
+					except ValueError:
+						print("Please input an integer")
+			except ValueError:
+				print("Please input an integer")
 
 def checkDirExists(musicDir):
 	if(path.exists(musicDir) and path.isdir(musicDir)):
