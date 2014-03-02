@@ -2,6 +2,7 @@ import curses
 from curses import panel
 from curses import textpad
 from groovesharkplugin import GroovesharkPlugin
+from client import Client
 
 class Menu(object):
 
@@ -98,17 +99,32 @@ class Textbox():
 
 		return retval
 
-class MyApp(object):
+class CursesClient(object):
+
+	__slots__ = ('screen', 'client')
 
 	def __init__(self, stdscreen):
 		self.screen = stdscreen
 		curses.curs_set(0)
+
+		self.setUpClient()
 
 		main_menu_items = [
 					('Add', self.add)
 					]
 		main_menu = Menu(main_menu_items, self.screen)
 		main_menu.display()
+
+		self.client.shouldHalt = True
+
+	def setUpClient(self):
+		nickname = self.pickNickName()
+		port = 5555
+		host = "localhost"
+		self.client = Client(host, port, nickname)
+
+	def pickNickName(self):
+		return Textbox("Nickname", self.screen).display()
 	
 	def add(self):
 		addMenu = [
@@ -118,7 +134,10 @@ class MyApp(object):
 		addMenu.display()
 	
 	def addFromGrooveshark(self):
-		plugin = GroovesharkPlugin(lambda lst: Menu(lst, self.screen).display(), lambda p: Textbox(p, self.screen).display()).pickSong()
+		plugin = GroovesharkPlugin(lambda lst: Menu(lst, self.screen).display(), lambda p: Textbox(p, self.screen).display())
+		song = plugin.pickSong()
+		songdata = plugin.getSongData(song)
+		self.client.sendSong(song, songdata)
 
 if __name__ == '__main__':
-	curses.wrapper(MyApp)
+	curses.wrapper(CursesClient)
