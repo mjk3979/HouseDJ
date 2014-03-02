@@ -21,7 +21,7 @@ class GroovesharkPlugin:
 		c = lst[i]
 		if type(c) is grooveshark.classes.Song:
 			return c
-		return self.getSongRec(self, c.songs)
+		return self.getSongRec(c.songs)
 
 	def pickSong(self):
 		responseTuple = inputChoice(["Song", "Artist", "Album"])

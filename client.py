@@ -146,12 +146,12 @@ def inputLoop():
 						print("Please input an integer")
 			except ValueError:
 				print("Please input an integer")
-	elif com == 'p':
-		sendMessage(PlayerCommand(PLAYER_PAUSE))
-	elif com == '+':
-		sendMessage(PlayerCommand(PLAYER_VOLUME_UP))
-	elif com == '-':
-		sendMessage(PlayerCommand(PLAYER_VOLUME_DOWN))
+		elif com == 'p':
+			sendMessage(PlayerCommand(PLAYER_PAUSE))
+		elif com == '+':
+			sendMessage(PlayerCommand(PLAYER_VOLUME_UP))
+		elif com == '-':
+			sendMessage(PlayerCommand(PLAYER_VOLUME_DOWN))
 
 
 def checkDirExists(musicDir):
