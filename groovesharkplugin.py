@@ -1,36 +1,37 @@
 from common import *
-from cmdline import *
 import grooveshark
 from grooveshark import Client
 import subprocess
 
 class GroovesharkPlugin:
-	__slots__ = ('client', 'songmap')
+	__slots__ = ('client', 'songmap', 'menuFunc', 'inputFunc')
 
-	def __init__(self):
+	def __init__(self, menuFunc, inputFunc):
 		self.client = Client()
 		self.client.init()
 		self.songmap = {}
+		self.menuFunc = menuFunc
+		self.inputFunc = inputFunc
 
 	def getSongRec(self, lst):
 		lst = list(lst)
 		if len(lst) == 0:
 			print("Sorry Charlie.  No Results.")
 			return None
-		i, _ = inputChoice(list(res.name + " by " + res.artist.name if type(res) == grooveshark.classes.Song else res.name for res in lst))
+		i, _ = self.menuFunc(list((s,) for s in (res.name + " by " + res.artist.name if type(res) == grooveshark.classes.Song else res.name for res in lst)))
 		c = lst[i]
 		if type(c) is grooveshark.classes.Song:
 			return c
 		return self.getSongRec(c.songs)
 
 	def pickSong(self):
-		responseTuple = inputChoice(["Song", "Artist", "Album"])
+		responseTuple = self.menuFunc(list((s,) for s in ["Song", "Artist", "Album"]))
 		if responseTuple == None:
 			return None
 		else:
 			typ,_ = responseTuple
 		typ = [Client.SONGS, Client.ARTISTS, Client.ALBUMS][typ]
-		search = input('Grooveshark search: ')
+		search = self.inputFunc('Grooveshark search: ')
 		song = self.getSongRec(self.client.search(search, typ))
 		if song == None:
 			return None
