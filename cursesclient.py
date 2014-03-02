@@ -87,7 +87,7 @@ class Textbox():
 		self.window.addstr(2, 2, self.prompt)
 		self.window.refresh()
 		curses.echo()
-		retval = self.window.getstr(10, 10, 60)
+		retval = self.window.getstr(2, 23, 60)
 		curses.noecho()
 		retval = retval.decode('UTF-8')
 
