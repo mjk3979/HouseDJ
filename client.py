@@ -1,4 +1,3 @@
-#!usr/bin/python
 import zmq
 from common import *
 import pickle
