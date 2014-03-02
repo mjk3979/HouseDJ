@@ -6,12 +6,14 @@ from client import Client
 
 class Menu(object):
 
-	def __init__(self, items, stdscreen):
+	def __init__(self, items, stdscreen, loop=False):
 		self.window = stdscreen.subwin(0,0)
 		self.window.keypad(1)
 		self.panel = panel.new_panel(self.window)
 		self.panel.hide()
 		panel.update_panels()
+
+		self.loop = loop
 
 		self.position = 0
 		self.items = items
@@ -47,6 +49,9 @@ class Menu(object):
 				if key in [curses.KEY_ENTER, ord('\n')]:
 					if self.position == len(self.items)-1:
 						break
+					elif self.loop:
+						if len(self.items[self.position]) > 1:
+							val = self.items[self.position][1]()
 					else:
 						if len(self.items[self.position]) > 1:
 							val = self.items[self.position][1]()
@@ -112,7 +117,7 @@ class CursesClient(object):
 		main_menu_items = [
 					('Add', self.add)
 					]
-		main_menu = Menu(main_menu_items, self.screen)
+		main_menu = Menu(main_menu_items, self.screen, True)
 		main_menu.display()
 
 		self.client.shouldHalt = True
