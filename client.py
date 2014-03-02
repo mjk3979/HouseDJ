@@ -13,43 +13,48 @@ from pydub import AudioSegment
 from io import BytesIO
 from os import path
 
-masterQueue = []
-qSocket = None
-socket = None
-shouldHalt = False
+class Client():
+	__slots__ = ('masterQueue', 'qSocket', 'socket', 'shouldHalt')
 
-def init(host,port):
-	global qSocket, socket, masterQueue
-	context = zmq.Context()
-	myClientData = ClientData(input('Nickname: '))
+	def __init__(self, host, port, nickname):
+		self.shouldHalt = False
+		self.__init_client__(host, port, nickname)
 
-	socket = context.socket(zmq.REQ)
-	socket.connect("tcp://%s:%s" % (host, port))
-	socket.send(pickle.dumps(myClientData))
-	ports = pickle.loads(socket.recv())
-	socket.close()
-	socket = context.socket(zmq.PAIR)
-	socket.connect("tcp://%s:%s" %(host, ports[0]))
+	def __init_client__(self, host, port, nickname):
+		context = zmq.Context()
+		myClientData = ClientData(nickname)
 
-	qContext = zmq.Context();
-	qSocket = qContext.socket(zmq.SUB)
-	qSocket.connect("tcp://%s:%s" % (host,ports[1])) 
-	qSocket.setsockopt_string(zmq.SUBSCRIBE, '') 
-	Thread(target=listenMasterQueue).start()
+		self.socket = context.socket(zmq.REQ)
+		self.socket.connect("tcp://%s:%s" % (host, port))
+		self.socket.send(pickle.dumps(myClientData))
+		ports = pickle.loads(self.socket.recv())
+		self.socket.close()
+		self.socket = context.socket(zmq.PAIR)
+		self.socket.connect("tcp://%s:%s" %(host, ports[0]))
 
-	masterQueue = ports[2]
+		qContext = zmq.Context();
+		self.qSocket = qContext.socket(zmq.SUB)
+		self.qSocket.connect("tcp://%s:%s" % (host,ports[1])) 
+		self.qSocket.setsockopt_string(zmq.SUBSCRIBE, '') 
+		Thread(target=self.listenMasterQueue).start()
 
-def listenMasterQueue():
-		global shouldHalt, qSocket, masterQueue
-		while not(shouldHalt):
-			try:
-				masterQueue = pickle.loads(qSocket.recv(flags=zmq.NOBLOCK))
-			except zmq.ZMQError:
-				sleep(.2)
+		masterQueue = ports[2]
 
-def sendMessage(data):
-	socket.send(pickle.dumps(data)) 
+	def listenMasterQueue(self):
+			while not(self.shouldHalt):
+				try:
+					self.masterQueue = pickle.loads(self.qSocket.recv(flags=zmq.NOBLOCK))
+				except zmq.ZMQError:
+					sleep(.2)
 
+	def sendMessage(self, data):
+		self.socket.send(pickle.dumps(data)) 
+
+	def sendSong(self, song, songdata):
+		self.sendMessage(QueueUpdate(COMMAND_ADD,song))
+		self.sendMessage((song,songdata))
+
+"""
 def inputLoop():		
 	gplugin = GroovesharkPlugin()
 	while True:
@@ -184,3 +189,4 @@ def main():
 
 if __name__ == '__main__':
 	main()
+"""
