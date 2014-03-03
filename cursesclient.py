@@ -132,17 +132,23 @@ class CursesClient(object):
 		return Textbox("Nickname", self.screen).display()
 	
 	def add(self):
-		addMenu = [
-			('Grooveshark', self.addFromGrooveshark)
-		]
-		addMenu = Menu(addMenu, self.screen)
-		addMenu.display()
+		while True:
+			addMenu = [
+				('Grooveshark', self.addFromGrooveshark)
+			]
+			addMenu = Menu(addMenu, self.screen)
+			val = addMenu.display() 
+			if val == None or val[1] == True:
+				return
 	
 	def addFromGrooveshark(self):
 		plugin = GroovesharkPlugin(lambda lst: Menu(lst, self.screen).display(), lambda p: Textbox(p, self.screen).display())
 		song = plugin.pickSong()
+		if song == None:
+			return False
 		songdata = plugin.getSongData(song)
 		self.client.sendSong(song, songdata)
+		return True
 
 if __name__ == '__main__':
 	curses.wrapper(CursesClient)
